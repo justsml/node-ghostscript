@@ -6,7 +6,7 @@ var create = function() {
 
 var gs = function() {
   this.options = [];
-  this._input = null;
+  this._input = [];
 };
 
 gs.prototype.batch = function() {
@@ -15,7 +15,7 @@ gs.prototype.batch = function() {
 };
 
 gs.prototype.device = function(device) {
-  device = device || 'jpeg';
+  device = device || 'pdfwrite';
   this.options.push('-sDEVICE=' + device);
   return this;
 };
@@ -23,16 +23,16 @@ gs.prototype.device = function(device) {
 gs.prototype.exec = function(callback) {
   var self = this;
 
-  if (!this._input) return callback("Please specify input");
+  if (!this._input.length) return callback("Please specify input");
 
-  var args = this.options.concat([this._input]).join(' ');
+  var args = this.options.concat(this._input).join(' ');
   exec('gs ' + args, function(err, stdout, stderr) {
     callback(err, stdout, stderr);
   });
 };
 
 gs.prototype.input = function(file) {
-  this._input = file;
+  this._input.push(file);
   return this;
 };
 
