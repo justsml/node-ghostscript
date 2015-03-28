@@ -23,16 +23,27 @@ gs.prototype.device = function(device) {
 gs.prototype.exec = function(callback) {
   var self = this;
 
-  if (!this._input.length) return callback("Please specify input");
+  if (!this._input.length) return callback(new Error("Please specify input file(s)"));
 
   var args = this.options.concat(this._input).join(' ');
   exec('gs ' + args, function(err, stdout, stderr) {
-    callback(err, stdout, stderr);
+    callback(err, stdout, stderr, args);
   });
 };
 
 gs.prototype.input = function(file) {
-  this._input.push(file);
+  var self = this;
+  if ( arguments.length >= 2 && typeof(arguments[1])==='string' ) {
+    this._input.concat([].slice.call(arguments));
+  } else if ( typeof(file) === 'string' ) {
+    this._input.push(file);
+  } else if ( Array.isArray(file) ) {
+    file.forEach(function _each(f) {
+      if (f) { self._input.push(f); }
+    });
+  } else {
+    throw new TypeError('ghostscript.input([path]) needs valid param(s)')
+  }
   return this;
 };
 

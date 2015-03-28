@@ -3,6 +3,10 @@
 .LSOverride
 Icon
 
+tmp
+temp
+*.tmp
+
 # Thumbnails
 ._*
 
