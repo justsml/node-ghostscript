@@ -46,7 +46,7 @@ describe('ghostscript', function() {
     });
 
     it('should convert pdf to jpeg', function(done) {
-      var dest    = path.resolve('./tmp/test-' + Date.now() + '.jpg')
+      var dest    = path.resolve('./tmp/output-jpeg-' + Date.now() + '.jpg')
           // logFile = path.resolve('./tests/pdfs/pdf-util.log');
       gs()
         .batch()
@@ -56,20 +56,9 @@ describe('ghostscript', function() {
         .input(path.resolve('./tests/pdfs/sample-img.pdf'))
         .exec(function(err, stdout, stderr) {
           if ( err ) {
-            console.warn('Error:::', err, stdout, stderr);
-            assert.ok(!err);
-            return done(err, stdout, stderr)            
+            console.warn('Error: :: ', err, stdout, stderr);
           }
-          // stderr.pipe( process.stdout );
-          function showData(data) {
-            console.log(Date.now(), ' ', data);
-          }
-          if ( stdout && stdout.on ) { stdout.on('data', showData) }
-          if ( stderr && stderr.on ) { stderr.on('data', showData) }
-          // var stream = stdout
-          //   .pipe(fs.createWriteStream(logFile, 'a'))
-          // stderr
-          //   .pipe(fs.createWriteStream(logFile + '.err', 'a'))
+          assert.ok(!err);
           done();
         });
     });
@@ -81,6 +70,7 @@ describe('ghostscript', function() {
         .batch()
         .nopause()
         .quiet()
+        .quality(true)
         .device()
         .output(dest)
         .input([

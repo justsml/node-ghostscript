@@ -1,5 +1,15 @@
 var exec = require('child_process').exec;
 
+// Reference: http://superuser.com/a/373740
+var OPTS_NO_DOWNSAMPLE = ['-dColorConversionStrategy=/LeaveColorUnchanged', 
+    '-dDownsampleMonoImages=false', '-dDownsampleGrayImages=false', 
+    '-dDownsampleColorImages=false'],
+  OPTS_DISABLE_RESIZE = ['-dColorConversionStrategy=/LeaveColorUnchanged', '-dEncodeColorImages=false', '-dEncodeGrayImages=false', '-dEncodeMonoImages=false'],
+  OPTS_JPEG_2000 = ['-dAutoFilterColorImages=false', 
+    '-dAutoFilterGrayImages=false', '-dColorImageFilter=/FlateEncode',
+    '-dGrayImageFilter=/FlateEncode'];
+// -dPDFSETTINGS=/[screen, ebook, printer, prepress]
+
 var create = function() {
   return new gs();
 };
@@ -14,6 +24,13 @@ gs.prototype.batch = function() {
   return this;
 };
 
+gs.prototype.quality = function(q) {
+  if ( q ) {
+    this.quality = q;
+  }
+  return this;
+};
+
 gs.prototype.device = function(device) {
   device = device || 'pdfwrite';
   this.options.push('-sDEVICE=' + device);
@@ -21,11 +38,12 @@ gs.prototype.device = function(device) {
 };
 
 gs.prototype.exec = function(callback) {
-  var self = this;
-
   if (!this._input.length) return callback(new Error("Please specify input file(s)"));
 
   var args = this.options.concat(this._input).join(' ');
+  if ( this.quality === true ) {
+    args.concat(OPTS_DISABLE_RESIZE);
+  }
   exec('gs ' + args, function(err, stdout, stderr) {
     callback(err, stdout, stderr, args);
   });
@@ -65,18 +83,14 @@ gs.prototype.output = function(file) {
   return this;
 };
 
-gs.prototype.q = gs.prototype.quiet;
-
-gs.prototype.quiet = function() {
+gs.prototype.q = gs.prototype.quiet = function() {
   this.options.push('-dQUIET');
   return this;
 };
 
-gs.prototype.resolution = function(xres, yres) {
+gs.prototype.r = gs.prototype.res = gs.prototype.resolution = function(xres, yres) {
   this.options.push('-r' + xres + (yres ? 'x' + yres : ''));
   return this;
 };
-
-gs.prototype.r = gs.prototype.res = gs.prototype.resolution;
 
 module.exports = create;
